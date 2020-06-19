@@ -5,10 +5,7 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     // Objects
-    public Transform camPivot;
-    float heading = 0;
     public Transform cam;
-
     CharacterController mover;
 
     // Camera
@@ -22,7 +19,8 @@ public class Player : MonoBehaviour
     Vector3 intent;
     Vector3 velocity;
     float speed = 5;
-    float accel = 2;
+    float acc = 8;
+    float turnSpeed = 5;
 
     void Start()
     {
@@ -38,9 +36,6 @@ public class Player : MonoBehaviour
 
     void DoInput()
     {
-        heading += Input.GetAxis("Mouse X") * Time.deltaTime * 180;
-        camPivot.rotation = Quaternion.Euler(0, heading, 0);
-
         input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         input = Vector2.ClampMagnitude(input, 1);
     }
@@ -58,9 +53,15 @@ public class Player : MonoBehaviour
 
     void DoMove()
     {
-        Vector3 intent = camF * input.y + camR * input.x;
+        intent = camF * input.y + camR * input.x;
 
-        velocity = Vector3.Lerp(velocity, intent * speed, accel * Time.deltaTime);
+        if (input.magnitude > 0)
+        {
+            Quaternion rot = Quaternion.LookRotation(intent);
+            transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
+        }
+
+        velocity = Vector3.Lerp(velocity, transform.forward * input.magnitude * speed, acc * Time.deltaTime);
 
         mover.Move(velocity * Time.deltaTime);
     }
