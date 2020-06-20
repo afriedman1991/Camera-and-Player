@@ -41,6 +41,7 @@ public class Player : MonoBehaviour
         CalculateGround();
         DoMove();
         DoGravity();
+        DoJump();
 
         mover.Move(velocity * Time.deltaTime);
     }
@@ -105,5 +106,16 @@ public class Player : MonoBehaviour
             velocity.y -= grav * Time.deltaTime;
         }
         velocity.y = Mathf.Clamp(velocity.y, -10, 10);
+    }
+
+    void DoJump()
+    {
+        if (grounded)
+        {
+            if (Input.GetButtonDown("Jump"))
+            {
+                velocity.y = 6;
+            }
+        }
     }
 }
