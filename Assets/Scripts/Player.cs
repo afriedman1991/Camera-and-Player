@@ -17,10 +17,17 @@ public class Player : MonoBehaviour
 
     // Physics
     Vector3 intent;
+    Vector3 velocityXZ;
     Vector3 velocity;
     float speed = 5;
-    float acc = 8;
+    float acc = 11;
     float turnSpeed = 5;
+    float turnSpeedLow = 7;
+    float turnSpeedHigh = 20;
+    
+    // Gravity
+    float grav = 10;
+    bool grounded = false;
 
     void Start()
     {
@@ -31,7 +38,11 @@ public class Player : MonoBehaviour
     {
         DoInput();
         CalculateCamera();
+        CalculateGround();
         DoMove();
+        DoGravity();
+
+        mover.Move(velocity * Time.deltaTime);
     }
 
     void DoInput()
@@ -51,9 +62,25 @@ public class Player : MonoBehaviour
         camR = camR.normalized;
     }
 
+    void CalculateGround()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position + Vector3.up * 0.1f, -Vector3.up, out hit, 0.2f))
+        {
+            grounded = true;
+        }
+        else
+        {
+            grounded = false;
+        }
+    }
+
     void DoMove()
     {
         intent = camF * input.y + camR * input.x;
+
+        float tS = velocity.magnitude/5;
+        turnSpeed = Mathf.Lerp(turnSpeedHigh, turnSpeedLow, tS);
 
         if (input.magnitude > 0)
         {
@@ -61,8 +88,22 @@ public class Player : MonoBehaviour
             transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
         }
 
-        velocity = Vector3.Lerp(velocity, transform.forward * input.magnitude * speed, acc * Time.deltaTime);
+        velocityXZ = velocity;
+        velocityXZ.y = 0;
+        velocityXZ = Vector3.Lerp(velocity, transform.forward * input.magnitude * speed, acc * Time.deltaTime);
+        velocity = new Vector3(velocityXZ.x, velocity.y, velocityXZ.z);
+    }
 
-        mover.Move(velocity * Time.deltaTime);
+    void DoGravity()
+    {
+        if (grounded)
+        {
+            velocity.y = -0.5f;
+        }
+        else
+        {
+            velocity.y -= grav * Time.deltaTime;
+        }
+        velocity.y = Mathf.Clamp(velocity.y, -10, 10);
     }
 }

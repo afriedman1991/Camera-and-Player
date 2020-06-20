@@ -8,12 +8,13 @@ public class Cam : MonoBehaviour
     float heading = 0;
     float tilt = 15;
     float camDist = 10;
+    float playerHeight = 1;
 
-    void Update()
+    void LateUpdate()
     {
         heading += Input.GetAxis("Mouse X") * Time.deltaTime * 180;
         transform.rotation = Quaternion.Euler(tilt, heading, 0);
 
-        transform.position = player.position - transform.forward * camDist;
+        transform.position = player.position - transform.forward * camDist + Vector3.up * playerHeight;
     }
 }
