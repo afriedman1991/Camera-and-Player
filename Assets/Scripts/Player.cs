@@ -29,9 +29,13 @@ public class Player : MonoBehaviour
     float grav = 10;
     bool grounded = false;
 
+    // Animation
+    Animator m_Animator;
+
     void Start()
     {
         mover = GetComponent<CharacterController>();
+        m_Animator = GetComponent<Animator>();
     }
 
     void Update()
@@ -85,8 +89,13 @@ public class Player : MonoBehaviour
 
         if (input.magnitude > 0)
         {
+            m_Animator.SetBool("IsWalking", true);
             Quaternion rot = Quaternion.LookRotation(intent);
             transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
+        }
+        else
+        {
+            m_Animator.SetBool("IsWalking", false);
         }
 
         velocityXZ = velocity;
