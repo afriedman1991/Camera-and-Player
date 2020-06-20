@@ -5,10 +5,7 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     // Objects
-    public Transform camPivot;
-    float heading = 0;
     public Transform cam;
-
     CharacterController mover;
 
     // Camera
@@ -20,9 +17,17 @@ public class Player : MonoBehaviour
 
     // Physics
     Vector3 intent;
+    Vector3 velocityXZ;
     Vector3 velocity;
     float speed = 5;
-    float accel = 2;
+    float acc = 11;
+    float turnSpeed = 5;
+    float turnSpeedLow = 7;
+    float turnSpeedHigh = 20;
+    
+    // Gravity
+    float grav = 10;
+    bool grounded = false;
 
     void Start()
     {
@@ -33,14 +38,15 @@ public class Player : MonoBehaviour
     {
         DoInput();
         CalculateCamera();
+        CalculateGround();
         DoMove();
+        DoGravity();
+
+        mover.Move(velocity * Time.deltaTime);
     }
 
     void DoInput()
     {
-        heading += Input.GetAxis("Mouse X") * Time.deltaTime * 180;
-        camPivot.rotation = Quaternion.Euler(0, heading, 0);
-
         input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         input = Vector2.ClampMagnitude(input, 1);
     }
@@ -56,12 +62,48 @@ public class Player : MonoBehaviour
         camR = camR.normalized;
     }
 
+    void CalculateGround()
+    {
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position + Vector3.up * 0.1f, -Vector3.up, out hit, 0.2f))
+        {
+            grounded = true;
+        }
+        else
+        {
+            grounded = false;
+        }
+    }
+
     void DoMove()
     {
-        Vector3 intent = camF * input.y + camR * input.x;
+        intent = camF * input.y + camR * input.x;
 
-        velocity = Vector3.Lerp(velocity, intent * speed, accel * Time.deltaTime);
+        float tS = velocity.magnitude/5;
+        turnSpeed = Mathf.Lerp(turnSpeedHigh, turnSpeedLow, tS);
 
-        mover.Move(velocity * Time.deltaTime);
+        if (input.magnitude > 0)
+        {
+            Quaternion rot = Quaternion.LookRotation(intent);
+            transform.rotation = Quaternion.Lerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
+        }
+
+        velocityXZ = velocity;
+        velocityXZ.y = 0;
+        velocityXZ = Vector3.Lerp(velocity, transform.forward * input.magnitude * speed, acc * Time.deltaTime);
+        velocity = new Vector3(velocityXZ.x, velocity.y, velocityXZ.z);
+    }
+
+    void DoGravity()
+    {
+        if (grounded)
+        {
+            velocity.y = -0.5f;
+        }
+        else
+        {
+            velocity.y -= grav * Time.deltaTime;
+        }
+        velocity.y = Mathf.Clamp(velocity.y, -10, 10);
     }
 }
