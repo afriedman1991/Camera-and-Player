@@ -7,7 +7,7 @@ public class Cam : MonoBehaviour
     public Transform player;
     float heading = 0;
     float tilt = 15;
-    float camDist = 10;
+    float camDist = 5;
     float playerHeight = 1;
 
     void LateUpdate()
