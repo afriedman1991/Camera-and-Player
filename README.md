@@ -1,5 +1,5 @@
 # Camera-and-Player
-A simple implementation of camera and player controls
+A simple implementation of camera and player controls, using the mouse and keyboard
 
 To test the game, UnityHub version 2.32 and Unity version 2019.3.13f1 are required.
 
